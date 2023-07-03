@@ -1,0 +1,7 @@
+# Miscellaneous
+*.log
+*.pyc
+.DS_Store
+.svn/
+.idea/
+.vscode/
