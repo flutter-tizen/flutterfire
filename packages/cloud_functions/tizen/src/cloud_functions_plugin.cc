@@ -130,8 +130,6 @@ class CloudFunctionsPlugin : public flutter::Plugin {
         [](const std::string& id) -> bool { return false; });
     Trace::Option::setTag(LOG_TAG);
 
-    firebase::SetLogLevel(firebase::LogLevel::kLogLevelVerbose);
-
     auto plugin = std::make_unique<CloudFunctionsPlugin>();
 
     channel->SetMethodCallHandler(
@@ -173,8 +171,8 @@ class CloudFunctionsPlugin : public flutter::Plugin {
       return result->Error("invalid-argument", "Invalid argument type.");
     }
 
-    TRACE(PLUGIN, "[TIZEN: HANDLE_METHOD_CALL] %s {\n%s\n}", method_name,
-          ToString(*arguments));
+    TRACEF(PLUGIN, "[TIZEN: HANDLE_METHOD_CALL] %s {\n%s\n}", method_name,
+           ToString(*arguments));
 
     CHECK(method_name == "FirebaseFunctions#call");
 

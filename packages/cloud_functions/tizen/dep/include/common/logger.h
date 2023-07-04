@@ -22,10 +22,9 @@
 #include <sstream>
 #include <string>
 
-/// @brief
 class LogOption {
  public:
-  static bool isEnabled(const std::string&);
+  static bool isEnabled(const std::string& pattern = "");
   /*
   example:
     LogOption::setExternalIsEnabled([](const std::string& id) -> bool {
@@ -41,10 +40,8 @@ class LogOption {
   static std::function<bool(const std::string&)> s_externalIsEnabled;
 };
 
-/// @brief
 class Logger {
  public:
-  /// @brief
   class Header {
    protected:
     virtual void writeHeader(std::stringstream&) = 0;
@@ -54,32 +51,41 @@ class Logger {
     friend class Logger;
   };
 
-  /// @brief
   class Output {
    public:
     virtual ~Output() = default;
     virtual void flush(std::stringstream& ss) = 0;
   };
 
-  Logger(std::shared_ptr<Output> out = nullptr);
+  Logger() = default;
+  Logger(std::shared_ptr<Output> out);
   Logger(const std::string& header, std::shared_ptr<Output> out = nullptr);
   Logger(Header&& header, std::shared_ptr<Output> out = nullptr);
   ~Logger();
 
   template <class T>
   Logger& operator<<(const T& msg) {
+    if (output_ == nullptr) {
+      return *this;
+    }
     stream_ << msg;
     return *this;
   }
 
   template <typename T, typename... TArgs>
   Logger& log(const T& v, TArgs... args) {
+    if (output_ == nullptr) {
+      return *this;
+    }
     stream_ << v << " ";
     log(args...);
     return *this;
   }
   template <typename T>
   Logger& log(const T& v) {
+    if (output_ == nullptr) {
+      return *this;
+    }
     stream_ << v;
     return *this;
   }
@@ -126,7 +132,6 @@ class Logger {
   std::shared_ptr<Output> output_;
 };
 
-/// @brief
 class StdOut : public Logger::Output {
  public:
   void flush(std::stringstream& ss) override;
