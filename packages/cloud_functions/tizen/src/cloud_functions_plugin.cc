@@ -1,6 +1,20 @@
+/*
+ * Copyright (c) 2023-present Samsung Electronics Co., Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "cloud_functions_plugin.h"
 
-// For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <firebase/functions.h>
 #include <firebase/functions/callable_reference.h>
 #include <firebase/functions/callable_result.h>
@@ -41,69 +55,67 @@ using firebase::functions::HttpsCallableResult;
 
 namespace {
 
-constexpr const char* METHOD_CHANNEL_NAME =
+constexpr const char* kMethodChannelName =
     "plugins.flutter.io/firebase_functions";
 
-#include <string>
-
 enum CloudFunctionsErrorCode {
-  OK = 0,
-  Cancelled = 1,
-  Unknown = 2,
-  InvalidArgument = 3,
-  DeadlineExceeded = 4,
-  NotFound = 5,
-  AlreadyExists = 6,
-  PermissionDenied = 7,
-  ResourceExhausted = 8,
-  FailedPrecondition = 9,
-  Aborted = 10,
-  OutOfRange = 11,
-  Unimplemented = 12,
-  Internal = 13,
-  Unavailable = 14,
-  DataLoss = 15,
-  Unauthenticated = 16
+  kOK = 0,
+  kCancelled = 1,
+  kUnknown = 2,
+  kInvalidArgument = 3,
+  kDeadlineExceeded = 4,
+  kNotFound = 5,
+  kAlreadyExists = 6,
+  kPermissionDenied = 7,
+  kResourceExhausted = 8,
+  kFailedPrecondition = 9,
+  kAborted = 10,
+  kOutOfRange = 11,
+  kUnimplemented = 12,
+  kInternal = 13,
+  kUnavailable = 14,
+  kDataLoss = 15,
+  kUnauthenticated = 16,
 };
 
 static const char* ToErrorCodeString(const int code) {
   switch (code) {
-    case CloudFunctionsErrorCode::OK:
+    case CloudFunctionsErrorCode::kOK:
       return "ok";
-    case CloudFunctionsErrorCode::Cancelled:
+    case CloudFunctionsErrorCode::kCancelled:
       return "cancelled";
-    case CloudFunctionsErrorCode::Unknown:
+    case CloudFunctionsErrorCode::kUnknown:
       return "unknown";
-    case CloudFunctionsErrorCode::InvalidArgument:
+    case CloudFunctionsErrorCode::kInvalidArgument:
       return "invalid-argument";
-    case CloudFunctionsErrorCode::DeadlineExceeded:
+    case CloudFunctionsErrorCode::kDeadlineExceeded:
       return "deadline-exceeded";
-    case CloudFunctionsErrorCode::NotFound:
+    case CloudFunctionsErrorCode::kNotFound:
       return "not-found";
-    case CloudFunctionsErrorCode::AlreadyExists:
+    case CloudFunctionsErrorCode::kAlreadyExists:
       return "already-exists";
-    case CloudFunctionsErrorCode::PermissionDenied:
+    case CloudFunctionsErrorCode::kPermissionDenied:
       return "permission-denied";
-    case CloudFunctionsErrorCode::ResourceExhausted:
+    case CloudFunctionsErrorCode::kResourceExhausted:
       return "resource-exhausted";
-    case CloudFunctionsErrorCode::FailedPrecondition:
+    case CloudFunctionsErrorCode::kFailedPrecondition:
       return "failed-precondition";
-    case CloudFunctionsErrorCode::Aborted:
+    case CloudFunctionsErrorCode::kAborted:
       return "aborted";
-    case CloudFunctionsErrorCode::OutOfRange:
+    case CloudFunctionsErrorCode::kOutOfRange:
       return "out-of-range";
-    case CloudFunctionsErrorCode::Unimplemented:
+    case CloudFunctionsErrorCode::kUnimplemented:
       return "unimplemented";
-    case CloudFunctionsErrorCode::Internal:
+    case CloudFunctionsErrorCode::kInternal:
       return "internal";
-    case CloudFunctionsErrorCode::Unavailable:
+    case CloudFunctionsErrorCode::kUnavailable:
       return "unavailable";
-    case CloudFunctionsErrorCode::DataLoss:
+    case CloudFunctionsErrorCode::kDataLoss:
       return "data-loss";
-    case CloudFunctionsErrorCode::Unauthenticated:
+    case CloudFunctionsErrorCode::kUnauthenticated:
       return "unauthenticated";
     default:
-      return "unknown";
+      return "unknown-code";
   }
 }
 
@@ -111,11 +123,11 @@ class CloudFunctionsPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrar* registrar) {
     auto channel = std::make_unique<MethodChannel<EncodableValue>>(
-        registrar->messenger(), METHOD_CHANNEL_NAME,
+        registrar->messenger(), kMethodChannelName,
         &flutter::StandardMethodCodec::GetInstance());
 
     LogOption::setExternalIsEnabled(
-        [](const std::string& id) -> bool { return true; });
+        [](const std::string& id) -> bool { return false; });
     Trace::Option::setTag(LOG_TAG);
 
     firebase::SetLogLevel(firebase::LogLevel::kLogLevelVerbose);
@@ -132,15 +144,13 @@ class CloudFunctionsPlugin : public flutter::Plugin {
 
   CloudFunctionsPlugin() { LOGD("Plugin created"); }
 
-  virtual ~CloudFunctionsPlugin() { LOGD("Plugin destroyed"); }
+  virtual ~CloudFunctionsPlugin() {}
 
   struct AsyncTask {
     std::function<void()> handler{nullptr};
   };
 
  private:
-  Queue<AsyncTask> async_task_queue_;
-
   void HandleMethodCall(const flutter::MethodCall<EncodableValue>& method_call,
                         std::unique_ptr<MethodResult<EncodableValue>> result) {
     TRACE_SCOPE0(PLUGIN);
@@ -160,11 +170,11 @@ class CloudFunctionsPlugin : public flutter::Plugin {
     const std::string& method_name = method_call.method_name();
     const auto* arguments = std::get_if<EncodableMap>(method_call.arguments());
     if (!arguments) {
-      return result->Error("Invalid arguments", "Invalid argument type.");
+      return result->Error("invalid-argument", "Invalid argument type.");
     }
 
-    LOGI("[TIZEN: HANDLE_METHOD_CALL] %s {\n%s\n}", method_name.c_str(),
-         ToString(*arguments).c_str());
+    TRACE(PLUGIN, "[TIZEN: HANDLE_METHOD_CALL] %s {\n%s\n}", method_name,
+          ToString(*arguments));
 
     CHECK(method_name == "FirebaseFunctions#call");
 
@@ -175,11 +185,12 @@ class CloudFunctionsPlugin : public flutter::Plugin {
 
     App* app = App::GetInstance(app_name.c_str());
     if (app == nullptr) {
-      return result->Error("-1", "No app matched found.");
+      return result->Error("unavailable", "No app matched found.");
     }
     Functions* functions = Functions::GetInstance(app, region.c_str());
     if (functions == nullptr) {
-      return result->Error("-1", "Can't create functions with the given app.");
+      return result->Error("invalid-argument",
+                           "Can't create functions with the given app.");
     }
     const auto origin = GetOptionalValue<std::string>(arguments, "origin");
     const auto timeout = GetOptionalValue<int64_t>(arguments, "timeout");
@@ -254,6 +265,8 @@ class CloudFunctionsPlugin : public flutter::Plugin {
 
     TRACE(PLUGIN, "/reference.Call");
   }
+
+  Queue<AsyncTask> async_task_queue_;
 };
 
 }  // namespace
