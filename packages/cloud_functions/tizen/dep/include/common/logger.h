@@ -57,15 +57,14 @@ class Logger {
     virtual void flush(std::stringstream& ss) = 0;
   };
 
-  Logger() = default;
-  Logger(std::shared_ptr<Output> out);
+  Logger(std::shared_ptr<Output> out = nullptr);
   Logger(const std::string& header, std::shared_ptr<Output> out = nullptr);
   Logger(Header&& header, std::shared_ptr<Output> out = nullptr);
-  ~Logger();
+  virtual ~Logger();
 
   template <class T>
   Logger& operator<<(const T& msg) {
-    if (output_ == nullptr) {
+    if (!isEnabled()) {
       return *this;
     }
     stream_ << msg;
@@ -74,7 +73,7 @@ class Logger {
 
   template <typename T, typename... TArgs>
   Logger& log(const T& v, TArgs... args) {
-    if (output_ == nullptr) {
+    if (!isEnabled()) {
       return *this;
     }
     stream_ << v << " ";
@@ -83,7 +82,7 @@ class Logger {
   }
   template <typename T>
   Logger& log(const T& v) {
-    if (output_ == nullptr) {
+    if (!isEnabled()) {
       return *this;
     }
     stream_ << v;
@@ -93,7 +92,7 @@ class Logger {
 
   template <typename T, typename... Args>
   Logger& print(const char* format, T value, Args... args) {
-    if (output_ == nullptr) {
+    if (!isEnabled()) {
       return *this;
     }
 
@@ -123,6 +122,9 @@ class Logger {
 
   Logger& print(const char* string_without_format_specifiers = "");
   Logger& flush();
+  bool isEnabled(const std::string& pattern = "") {
+    return LogOption::isEnabled(pattern);
+  }
 
  protected:
   std::stringstream stream_;
@@ -134,6 +136,11 @@ class Logger {
 
 class StdOut : public Logger::Output {
  public:
+  static std::shared_ptr<StdOut> instance() {
+    static std::shared_ptr<StdOut> output = std::make_shared<StdOut>();
+    return output;
+  }
+
   void flush(std::stringstream& ss) override;
 };
 
