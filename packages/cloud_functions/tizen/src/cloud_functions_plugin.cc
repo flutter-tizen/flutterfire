@@ -37,7 +37,6 @@
 #include "log.h"
 #include "queue.hpp"
 
-using flutter::BinaryMessenger;
 using flutter::EncodableMap;
 using flutter::EncodableValue;
 using flutter::MethodChannel;
@@ -126,8 +125,11 @@ class CloudFunctionsPlugin : public flutter::Plugin {
         registrar->messenger(), kMethodChannelName,
         &flutter::StandardMethodCodec::GetInstance());
 
-    LogOption::setExternalIsEnabled(
-        [](const std::string& id) -> bool { return false; });
+    LogOption::setExternalIsEnabled([](const std::string& id) -> bool {
+      // NOTE: TRACE logs are internal use only for plugin development and
+      // should be disabled for release.
+      return false;
+    });
     Trace::Option::setTag(LOG_TAG);
 
     auto plugin = std::make_unique<CloudFunctionsPlugin>();
@@ -139,10 +141,6 @@ class CloudFunctionsPlugin : public flutter::Plugin {
 
     registrar->AddPlugin(std::move(plugin));
   }
-
-  CloudFunctionsPlugin() { LOGD("Plugin created"); }
-
-  virtual ~CloudFunctionsPlugin() {}
 
   struct AsyncTask {
     std::function<void()> handler{nullptr};
