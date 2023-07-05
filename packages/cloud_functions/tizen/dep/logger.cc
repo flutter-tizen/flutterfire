@@ -75,7 +75,7 @@ void LogOption::setExternalIsEnabled(
 
 bool LogOption::isEnabled(const std::string& pattern) {
   if (s_externalIsEnabled == nullptr) {
-    return true;
+    return false;
   }
   return s_externalIsEnabled(pattern);
 }

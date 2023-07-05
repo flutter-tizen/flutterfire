@@ -34,7 +34,6 @@
 #include "common/to_string.h"
 #include "common/trace.h"
 #include "common/utils.h"
-#include "log.h"
 #include "queue.hpp"
 
 using flutter::EncodableMap;
@@ -124,14 +123,6 @@ class CloudFunctionsPlugin : public flutter::Plugin {
     auto channel = std::make_unique<MethodChannel<EncodableValue>>(
         registrar->messenger(), kMethodChannelName,
         &flutter::StandardMethodCodec::GetInstance());
-
-    LogOption::setExternalIsEnabled([](const std::string& id) -> bool {
-      // NOTE: TRACE logs are internal use only for plugin development and
-      // should be disabled for release.
-      return false;
-    });
-    Trace::Option::setTag(LOG_TAG);
-
     auto plugin = std::make_unique<CloudFunctionsPlugin>();
 
     channel->SetMethodCallHandler(
@@ -149,7 +140,7 @@ class CloudFunctionsPlugin : public flutter::Plugin {
  private:
   void HandleMethodCall(const flutter::MethodCall<EncodableValue>& method_call,
                         std::unique_ptr<MethodResult<EncodableValue>> result) {
-    TRACE_SCOPE0(PLUGIN);
+    TRACE_SCOPE0(FUNCTION);
 
     // 0. Handle remaining AsyncTasks.
 
@@ -169,7 +160,7 @@ class CloudFunctionsPlugin : public flutter::Plugin {
       return result->Error("invalid-argument", "Invalid argument type.");
     }
 
-    TRACEF(PLUGIN, "[TIZEN: HANDLE_METHOD_CALL] %s {\n%s\n}", method_name,
+    TRACEF(FUNCTION, "[TIZEN: HANDLE_METHOD_CALL] %s {\n%s\n}", method_name,
            ToString(*arguments));
 
     CHECK(method_name == "FirebaseFunctions#call");
@@ -196,7 +187,7 @@ class CloudFunctionsPlugin : public flutter::Plugin {
     }
 
     if (timeout) {
-      LOGW("timeout isn't supported.");
+      TRACE(FUNCTION, "[!] timeout isn't supported.");
     }
 
     // 2. Call the function requested.
@@ -209,7 +200,7 @@ class CloudFunctionsPlugin : public flutter::Plugin {
       std::function<void()> post_task;
     };
 
-    TRACE(PLUGIN, "reference.Call");
+    TRACE(FUNCTION, "reference.Call");
 
     std::shared_ptr<HttpsCallableReference> reference(
         new HttpsCallableReference(functions->GetHttpsCallable(
@@ -224,14 +215,14 @@ class CloudFunctionsPlugin : public flutter::Plugin {
             [](const Future<HttpsCallableResult>& future, void* data) {
               PointerScope<Param> param(data);
               if (future.status() == FutureStatus::kFutureStatusComplete) {
-                TRACE(PLUGIN, "FutureStatus::kFutureStatusComplete");
+                TRACE(FUNCTION, "FutureStatus::kFutureStatusComplete");
                 if (future.error() == Error::kErrorNone) {
-                  TRACE_SCOPE0(PLUGIN, "FutureStatus::Success");
+                  TRACE_SCOPE0(FUNCTION, "FutureStatus::Success");
                   param->result->Success(
                       Conversion::ToEncodableValue(future.result()->data()));
                 } else {
                   TRACE_SCOPE0(
-                      PLUGIN, "FutureStatus::Error", "code:", future.error(),
+                      FUNCTION, "FutureStatus::Error", "code:", future.error(),
                       "code_string:", ToErrorCodeString(future.error()),
                       "error_message:", future.error_message());
 
@@ -245,7 +236,7 @@ class CloudFunctionsPlugin : public flutter::Plugin {
                   auto details = EncodableMap{
                       {EncodableValue("additionalData"), EncodableValue(m)},
                   };
-                  TRACE(PLUGIN, "details", details);
+                  TRACE(FUNCTION, "details", details);
 
                   param->result->Error(std::to_string(future.error()),
                                        future.error_message(),
@@ -259,7 +250,7 @@ class CloudFunctionsPlugin : public flutter::Plugin {
               async_task_queue_.push({.handler = [reference]() {}});
             }));
 
-    TRACE(PLUGIN, "/reference.Call");
+    TRACE(FUNCTION, "/reference.Call");
   }
 
   Queue<AsyncTask> async_task_queue_;
