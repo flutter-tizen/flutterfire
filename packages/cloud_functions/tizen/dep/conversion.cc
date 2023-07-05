@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "common/trace.h"  // for UNIMPLEMENTED
+#include "common/trace.h"  // for UNIMPLEMENTED and FATAL
 #include "common/utils.h"
 
 using firebase::Variant;
@@ -60,8 +60,9 @@ Variant Conversion::ToFirebaseVariant(const EncodableValue& encodable_value) {
     case 13:  // std::vector<float>
       return Variant(std::get<std::vector<float>>(encodable_value));
     default:
-      throw std::runtime_error("Invalid EncodableValue type");
+      FATAL("Invalid EncodableValue type");
   }
+  return Variant();
 }
 
 Variant Conversion::ToFirebaseVariant(const EncodableList& encodable_list) {
@@ -115,6 +116,7 @@ EncodableValue Conversion::ToEncodableValue(const Variant& v) {
       return EncodableValue(map);
     }
     default:
-      throw std::runtime_error("Unsupported Variant type");
+      FATAL("Unsupported Variant type");
   }
+  return EncodableValue();
 }

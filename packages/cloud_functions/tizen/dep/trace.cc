@@ -22,9 +22,9 @@
 #define TRACE_ID_LENGTH_LIMIT 10
 #define COLOR_RESET "\033[0m"
 #define COLOR_DIM "\033[0;2m"
-#define LOG_PREFIX_PATTERN ".*TizenPlugin"
+#define LOG_PREFIX_PATTERN ".*Plugin"
 
-std::string Trace::Option::s_tag_;
+std::string Trace::Option::s_tag_ = "FirebasePlugin";
 
 #if defined(__TIZEN__) || defined(TIZEN)
 
@@ -104,7 +104,7 @@ Trace::Trace(std::string id, const char* functionName, const char* filename,
     return;
   }
 
-  writeHeader(stream_, "TRACE", id);
+  writeHeader(stream_, Option::tag(), id);
   stream_ << IndentCounter::getString(id)
           << createCodeLocation(functionName, filename, line,
                                 LOG_PREFIX_PATTERN)
@@ -116,5 +116,5 @@ Trace::Trace(std::string id) : Logger(CustomOutput::instance()) {
     return;
   }
 
-  writeHeader(stream_, "TRACE", id);
+  writeHeader(stream_, Option::tag(), id);
 }

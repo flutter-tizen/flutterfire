@@ -25,15 +25,6 @@
 class LogOption {
  public:
   static bool isEnabled(const std::string& pattern = "");
-  /*
-  example:
-    LogOption::setExternalIsEnabled([](const std::string& id) -> bool {
-        if (GlobalOptions::instance().has("TRACE", id.c_str())) {
-            return true;
-        }
-        return false;
-    });
-  */
   static void setExternalIsEnabled(std::function<bool(const std::string&)>);
 
  private:
