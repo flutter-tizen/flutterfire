@@ -93,17 +93,17 @@ Logger::Logger(std::shared_ptr<Output> out) { initialize(out); }
 
 Logger::Logger(const std::string& header, std::shared_ptr<Output> out)
     : output_(out) {
-  stream_ << header;
   initialize(output_);
+  stream_ << header;
 }
 
 Logger::Logger(Header&& header, std::shared_ptr<Output> out) : output_(out) {
-  header.write(stream_);
   initialize(output_);
+  header.write(stream_);
 }
 
 Logger::~Logger() {
-  if (output_ == nullptr) {
+  if (!isEnabled() || output_ == nullptr) {
     return;
   }
   // stream ends with both reset-styles and endl characters.
@@ -140,7 +140,7 @@ Logger& Logger::print(const char* string_without_format_specifiers) {
 }
 
 Logger& Logger::flush() {
-  if (output_) {
+  if (isEnabled() && output_) {
     output_->flush(stream_);
   }
   stream_.str("");

@@ -32,29 +32,29 @@ std::string Trace::Option::s_tag_;
 
 class PriorityLog {
  public:
-  class Info : public Logger::Output {
+  class Debug : public Logger::Output {
    public:
     void flush(std::stringstream& stream) override {
-      dlog_print(DLOG_INFO, Trace::Option::tag(), stream.str().c_str());
+      dlog_print(DLOG_DEBUG, Trace::Option::tag(), "%s", stream.str().c_str());
     }
   };
 
   class Warn : public Logger::Output {
    public:
     void flush(std::stringstream& stream) override {
-      dlog_print(DLOG_WARN, Trace::Option::tag(), stream.str().c_str());
+      dlog_print(DLOG_WARN, Trace::Option::tag(), "%s", stream.str().c_str());
     }
   };
 
   class Error : public Logger::Output {
    public:
     void flush(std::stringstream& stream) override {
-      dlog_print(DLOG_ERROR, Trace::Option::tag(), stream.str().c_str());
+      dlog_print(DLOG_ERROR, Trace::Option::tag(), "%s", stream.str().c_str());
     }
   };
 };
 
-class CustomOutput : public PriorityLog::Info {
+class CustomOutput : public PriorityLog::Debug {
  public:
   static std::shared_ptr<CustomOutput> instance() {
     static std::shared_ptr<CustomOutput> output =
@@ -67,8 +67,8 @@ class CustomOutput : public PriorityLog::Info {
 static std::string trim(std::string const& str,
                         std::string const& whitespace = " \r\n\t\v\f") {
   if (str.length() == 0) return "";
-  auto start = str.find_first_not_of(whitespace);
-  auto end = str.find_last_not_of(whitespace);
+  std::size_t start = str.find_first_not_of(whitespace);
+  std::size_t end = str.find_last_not_of(whitespace);
   return str.substr(start, end - start + 1);
 }
 
@@ -83,19 +83,9 @@ void Trace_Fatal(const char* functionName, const char* filename, const int line,
 
 #else
 
-class CustomOutput : public Logger::Output {
+class CustomOutput : public StdOut::Output {
  public:
-  void flush(std::stringstream& ss) override {
-    // NOTE: We use stdout for now since there is no macro to print
-    // a raw string only. e.g) STARFISH_LOG_INFO("%s", "blahblah");
-    std::cout << ss.str();
-  };
-
-  static std::shared_ptr<CustomOutput> instance() {
-    static std::shared_ptr<CustomOutput> output =
-        std::make_shared<CustomOutput>();
-    return output;
-  }
+  static std::shared_ptr<CustomOutput> instance() { return StdOut::instance(); }
 };
 #endif
 
@@ -108,8 +98,9 @@ static void writeHeader(std::ostream& ss, const std::string& tag,
 }
 
 Trace::Trace(std::string id, const char* functionName, const char* filename,
-             const int line) {
-  if (!LogOption::isEnabled(id)) {
+             const int line)
+    : Logger(CustomOutput::instance()) {
+  if (!isEnabled(id)) {
     return;
   }
 
@@ -118,14 +109,12 @@ Trace::Trace(std::string id, const char* functionName, const char* filename,
           << createCodeLocation(functionName, filename, line,
                                 LOG_PREFIX_PATTERN)
           << " " << COLOR_RESET;
-  initialize(CustomOutput::instance());
 }
 
-Trace::Trace(std::string id) {
-  if (!LogOption::isEnabled(id)) {
+Trace::Trace(std::string id) : Logger(CustomOutput::instance()) {
+  if (!isEnabled(id)) {
     return;
   }
 
-  writeHeader(stream_, "INFO", id);
-  initialize(CustomOutput::instance());
+  writeHeader(stream_, "TRACE", id);
 }

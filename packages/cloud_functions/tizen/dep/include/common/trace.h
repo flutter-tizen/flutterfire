@@ -26,7 +26,7 @@ class Trace : public Logger {
   Trace(std::string id, const char* functionName, const char* filename,
         const int line, const T& v, TArgs... args)
       : Trace(id, functionName, filename, line) {
-    if (!LogOption::isEnabled(id)) {
+    if (!isEnabled(id)) {
       return;
     }
     stream_ << v << " ";
