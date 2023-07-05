@@ -1,0 +1,2 @@
+plugins:
+  tests: ["wearable-5.5", "tv-7.0"]

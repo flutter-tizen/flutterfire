@@ -198,17 +198,12 @@ class IntegrationTestCommand extends PackageLoopingCommand {
       return PackageResult.fail(<String>['No devices to test.']);
     }
 
-    final List<RepositoryPackage> examples = package.getExamples().toList();
-    if (examples.isEmpty) {
-      return PackageResult.fail(<String>[
-        'Missing example directory (use --exclude if this is intentional).'
-      ]);
-    }
+    final workingDir = package.directory;
 
     io.ProcessResult processResult = await processRunner.run(
       'flutter-tizen',
       <String>['pub', 'get'],
-      workingDir: package.directory,
+      workingDir: workingDir,
     );
     if (processResult.exitCode != 0) {
       return PackageResult.fail(<String>[
@@ -216,33 +211,29 @@ class IntegrationTestCommand extends PackageLoopingCommand {
       ]);
     }
 
-    // Number of test = examples * profiles
     final List<String> errors = <String>[];
-    for (final RepositoryPackage example in examples) {
-      if (!example.pubspecFile.existsSync()) {
-        errors.add('Missing pubspec file in ${example.path}.');
-        continue;
-      }
+    if (!workingDir.childFile('pubspec.yaml').existsSync()) {
+      return PackageResult.fail(
+          <String>['Missing pubspec file in $workingDir.']);
+    }
 
-      final Directory integrationTestDir =
-          example.directory.childDirectory('integration_test');
-      if (!integrationTestDir.existsSync() ||
-          integrationTestDir.listSync().isEmpty) {
-        errors.add('Missing integration tests in ${example.path} '
-            '(use --exclude if this is intentional).');
-        continue;
-      }
+    final Directory integrationTestDir =
+        workingDir.childDirectory('integration_test');
+    if (!integrationTestDir.existsSync() ||
+        integrationTestDir.listSync().isEmpty) {
+      return PackageResult.fail(<String>[
+        'Missing integration tests in $workingDir (use --exclude if this is intentional).'
+      ]);
+    }
 
-      for (final Device device in devices) {
-        String? error =
-            await device.runIntegrationTest(example.directory, _timeout);
-        if (error != null) {
-          // Tests may fail unexpectedly on a self-hosted runner. Try again.
-          error = await device.runIntegrationTest(example.directory, _timeout);
-        }
-        if (error != null) {
-          errors.add(error);
-        }
+    for (final Device device in devices) {
+      String? error = await device.runIntegrationTest(workingDir, _timeout);
+      if (error != null) {
+        // Tests may fail unexpectedly on a self-hosted runner. Try again.
+        error = await device.runIntegrationTest(workingDir, _timeout);
+      }
+      if (error != null) {
+        errors.add(error);
       }
     }
 
