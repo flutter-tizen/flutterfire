@@ -1,0 +1,3 @@
+PREBUILD_COMMAND = ./tar_url.sh \
+  https://github.com/daeye0n/gooddaytocode/archive/refs/tags/v10.4.0-draft-4.tar.gz \
+  && ./cp_firebase_libs.sh
