@@ -1,0 +1,29 @@
+{
+  "emulators": {
+    "functions": {
+      "port": 5001,
+      "host": "PLACEHOLDER"
+    },
+    "database": {
+      "port": 9000,
+      "host": "PLACEHOLDER"
+    },
+    "ui": {
+      "enabled": true,
+      "host": "PLACEHOLDER"
+    },
+    "singleProjectMode": true
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ]
+}
