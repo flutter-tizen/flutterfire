@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - dev/ci
 
 jobs:
   integration_test:
