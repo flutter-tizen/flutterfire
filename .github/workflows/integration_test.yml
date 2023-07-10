@@ -1,0 +1,31 @@
+name: Integration Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  integration_test:
+    runs-on: [self-hosted]
+    if: ${{ github.repository_owner == 'flutter-tizen' }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Install flutter-tizen
+        uses: actions/checkout@v3
+        with:
+          repository: flutter-tizen/flutter-tizen
+          path: flutter-tizen
+      - name: Set firebase options
+        run: |
+          bash ${{ secrets.PRE_INSTALLER }}
+      - name: Run tests
+        run: |
+          export PATH=`pwd`/flutter-tizen/bin:$PATH
+          ./tools/tools_runner.sh integration-test --generate-emulators --recipe ./.github/recipe.yaml

@@ -1,0 +1,5 @@
+plugins:
+  firebase_core: []
+  firebase_database: []
+  firebase_storage: []
+  cloud_functions: []
