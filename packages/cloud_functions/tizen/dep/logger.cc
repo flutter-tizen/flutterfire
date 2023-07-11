@@ -55,29 +55,29 @@ std::string createCodeLocation(const char* functionName, const char* filename,
 }
 
 void writeThreadIdentifier(std::ostream& os) {
-  static int s_id = 0;
+  static int id = 0;
   static thread_local int thisThreadId = 0;
 
   if (thisThreadId == 0) {
-    thisThreadId = ++s_id;
+    thisThreadId = ++id;
   }
   os << "[" << thisThreadId << "] ";
 }
 
-std::function<bool(const std::string&)> LogOption::s_externalIsEnabled;
+std::function<bool(const std::string&)> LogOption::externalIsEnabled;
 
 void LogOption::setExternalIsEnabled(
     std::function<bool(const std::string&)> func) {
-  s_externalIsEnabled = func;
+  externalIsEnabled = func;
 }
 
 // --- LogOption ---
 
 bool LogOption::isEnabled(const std::string& pattern) {
-  if (s_externalIsEnabled == nullptr) {
+  if (externalIsEnabled == nullptr) {
     return false;
   }
-  return s_externalIsEnabled(pattern);
+  return externalIsEnabled(pattern);
 }
 
 // --- Logger::Header ---
@@ -112,13 +112,13 @@ Logger::~Logger() {
 }
 
 void Logger::initialize(std::shared_ptr<Output> out) {
-  static thread_local std::shared_ptr<StdOut> s_loggerOutput;
+  static thread_local std::shared_ptr<StdOut> loggerOutput;
 
   if (out == nullptr) {
-    if (s_loggerOutput == nullptr) {
-      s_loggerOutput = std::make_shared<StdOut>();
+    if (loggerOutput == nullptr) {
+      loggerOutput = std::make_shared<StdOut>();
     }
-    output_ = s_loggerOutput;
+    output_ = loggerOutput;
   } else {
     output_ = out;
   }
@@ -152,21 +152,21 @@ void StdOut::flush(std::stringstream& stream) { std::cout << stream.str(); }
 
 // --- Utils ---
 
-thread_local int s_indentCount = 0;
-thread_local int s_deltaCount = 0;
+thread_local int indentCount = 0;
+thread_local int deltaCount = 0;
 
 void IndentCounter::indent(std::string id) {
   if (!LogOption::isEnabled(id)) {
     return;
   }
-  s_deltaCount++;
+  deltaCount++;
 }
 
 void IndentCounter::unIndent(std::string id) {
   if (!LogOption::isEnabled(id)) {
     return;
   }
-  s_deltaCount--;
+  deltaCount--;
 }
 
 IndentCounter::IndentCounter(std::string id) {
@@ -175,27 +175,27 @@ IndentCounter::IndentCounter(std::string id) {
   if (!LogOption::isEnabled(id)) {
     return;
   }
-  s_indentCount++;
+  indentCount++;
 }
 
 IndentCounter::~IndentCounter() {
   if (!LogOption::isEnabled(id_)) {
     return;
   }
-  s_indentCount--;
+  indentCount--;
 }
 
 std::string IndentCounter::getString(std::string id) {
-  assert(s_indentCount >= 0);
+  assert(indentCount >= 0);
 
   std::ostringstream oss;
-  int indentCount = s_indentCount + s_deltaCount;
+  int count = indentCount + deltaCount;
 
-  if (s_deltaCount > 0) {
-    oss << s_deltaCount << " ";
+  if (deltaCount > 0) {
+    oss << deltaCount << " ";
   }
 
-  for (int i = 1; i < std::min(30, indentCount); ++i) {
+  for (int i = 1; i < std::min(30, count); ++i) {
     oss << "  ";
   }
 

@@ -24,7 +24,7 @@
 #define COLOR_DIM "\033[0;2m"
 #define LOG_PREFIX_PATTERN ".*Plugin"
 
-std::string Trace::Option::s_tag_ = "FirebasePlugin";
+std::string Trace::Option::tag_ = "FirebasePlugin";
 
 #if defined(__TIZEN__) || defined(TIZEN)
 

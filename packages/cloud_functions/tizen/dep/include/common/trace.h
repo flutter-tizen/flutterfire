@@ -35,11 +35,11 @@ class Trace : public Logger {
 
   class Option {
    public:
-    static void setTag(const char* tagName) { s_tag_ = tagName; }
-    static const char* tag() { return s_tag_.c_str(); }
+    static void setTag(const char* tagName) { tag_ = tagName; }
+    static const char* tag() { return tag_.c_str(); }
 
    private:
-    static std::string s_tag_;
+    static std::string tag_;
   };
 };
 
