@@ -28,7 +28,7 @@ class LogOption {
   static void setExternalIsEnabled(std::function<bool(const std::string&)>);
 
  private:
-  static std::function<bool(const std::string&)> s_externalIsEnabled;
+  static std::function<bool(const std::string&)> externalIsEnabled;
 };
 
 class Logger {
