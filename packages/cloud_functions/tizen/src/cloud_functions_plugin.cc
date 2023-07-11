@@ -202,11 +202,14 @@ class CloudFunctionsPlugin : public flutter::Plugin {
 
     TRACE(FUNCTION, "reference.Call");
 
+    auto function_name =
+        GetOptionalValue<std::string>(arguments, "functionName");
+
+    CHECK(function_name);
+
     std::shared_ptr<HttpsCallableReference> reference(
-        new HttpsCallableReference(functions->GetHttpsCallable(
-            GetOptionalValue<std::string>(arguments, "functionName")
-                .value()
-                .c_str())));
+        new HttpsCallableReference(
+            functions->GetHttpsCallable(function_name.value().c_str())));
 
     EncodableValue parameters = GetEncodableValue(arguments, "parameters");
 

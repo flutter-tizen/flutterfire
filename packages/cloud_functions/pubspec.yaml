@@ -1,8 +1,8 @@
 name: cloud_functions_tizen
 description: A Flutter plugin allowing you to use Firebase Cloud Functions.
 version: 0.1.0
-homepage: REPLACEME
-repository: REPLACEME
+homepage:
+repository:
 publish_to: 'none'
 
 environment:

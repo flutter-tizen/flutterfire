@@ -24,6 +24,6 @@ EncodableValue GetEncodableValue(const EncodableMap* map, const char* key) {
   if (iter != map->end()) {
     return iter->second;
   }
-  // "EncodableMap has no key,'%s'"
+  // EncodableMap has no key.
   return EncodableValue();
 }
