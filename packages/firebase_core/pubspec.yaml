@@ -13,12 +13,11 @@ dependencies:
   firebase_core_platform_interface: 4.5.2
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
   pigeon: ^3.2.9
 
 flutter:

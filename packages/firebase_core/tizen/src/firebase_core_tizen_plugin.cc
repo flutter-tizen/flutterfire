@@ -6,11 +6,12 @@
 
 #include <firebase/app.h>
 #include <firebase/log.h>
-#include <flutter/method_channel.h>
 #include <flutter/plugin_registrar.h>
 #include <flutter/standard_method_codec.h>
 
+#include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "log.h"

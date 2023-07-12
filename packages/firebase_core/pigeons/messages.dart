@@ -9,6 +9,7 @@ import 'package:pigeon/pigeon.dart';
     dartOut: 'temp/messages.g.dart', // do not use it
     cppHeaderOut: 'tizen/src/messages.h',
     cppSourceOut: 'tizen/src/messages.cc',
+    copyrightHeader: 'pigeons/copyright.txt',
   ),
 )
 class PigeonFirebaseOptions {
