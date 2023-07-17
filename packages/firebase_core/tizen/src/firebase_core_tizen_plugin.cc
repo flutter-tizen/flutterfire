@@ -7,7 +7,6 @@
 #include <firebase/app.h>
 #include <firebase/log.h>
 #include <flutter/plugin_registrar.h>
-#include <flutter/standard_method_codec.h>
 
 #include <functional>
 #include <memory>
@@ -65,7 +64,7 @@ FirebaseCoreTizenPlugin::FirebaseCoreTizenPlugin(
   FirebaseCoreHostApi::SetUp(registrar->messenger(), this);
   FirebaseAppHostApi::SetUp(registrar->messenger(), this);
 
-  firebase::SetLogLevel(firebase::LogLevel::kLogLevelVerbose);
+  firebase::SetLogLevel(firebase::LogLevel::kLogLevelWarning);
 }
 
 FirebaseCoreTizenPlugin::~FirebaseCoreTizenPlugin() {}
