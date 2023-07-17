@@ -1,0 +1,26 @@
+name: firebase_core_tizen_example
+description: Demonstrates how to use the firebase_core_tizen plugin.
+
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  firebase_core: 2.4.1
+  firebase_core_tizen:
+    path: ../
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  integration_test_tizen: ^2.0.1
+
+flutter:
+  uses-material-design: true
