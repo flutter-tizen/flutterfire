@@ -3,7 +3,7 @@
 
 APPNAME = firebase_functions_plugin
 type = sharedLib
-profile = common-5.5
+profile = common-7.0
 
 # Source files
 USER_SRCS += src/*.cc dep/*.cc
