@@ -15,7 +15,6 @@ dependencies:
   cloud_functions_platform_interface: 5.1.26
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
 
 dependency_overrides:
   firebase_core_tizen:
