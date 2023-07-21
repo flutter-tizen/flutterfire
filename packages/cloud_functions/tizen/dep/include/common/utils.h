@@ -17,9 +17,12 @@
 
 #include <flutter/encodable_value.h>
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <variant>
+
+#include "trace.h"  // UNLIKELY, FATAL
 
 template <typename T>
 class PointerScope {
@@ -28,17 +31,34 @@ class PointerScope {
   PointerScope(void* p) { value_ = reinterpret_cast<T*>(p); }
   virtual ~PointerScope() { delete value_; }
   T* operator->() { return value_; }
-  T* operator*() { return value_; }
 
  private:
   T* value_;
 };
 
+template <typename T>
+class Optional : public std::optional<T> {
+ public:
+  using std::optional<T>::optional;
+
+  template <typename F>
+  T checked(F&& handler = {}) {
+    if (UNLIKELY(!this->has_value())) {
+      if constexpr (std::is_invocable_v<F>) {
+        std::invoke(std::forward<F>(handler));
+      } else {
+        FATAL("Empty Optional");
+      }
+    }
+    return this->value();
+  }
+};
+
 // EncodableMap
 
 template <typename T>
-std::optional<T> GetOptionalValue(const flutter::EncodableMap* map,
-                                  const char* key) {
+Optional<T> GetOptionalValue(const flutter::EncodableMap* map,
+                             const char* key) {
   const auto& iter = map->find(flutter::EncodableValue(key));
   if (iter != map->end() && !iter->second.IsNull()) {
     if (auto* value = std::get_if<T>(&iter->second)) {

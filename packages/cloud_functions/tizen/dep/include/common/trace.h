@@ -76,13 +76,12 @@ class Trace : public Logger {
 
 #endif
 
-/* LIKELY */
-#ifndef LIKELY
-#if defined(COMPILER_GCC) || defined(COMPILER_CLANG)
-#define LIKELY(x) __builtin_expect((x), 1)
+#ifdef __GNUC__
+#define LIKELY(condition) __builtin_expect(!!(condition), 1)
+#define UNLIKELY(condition) __builtin_expect(!!(condition), 0)
 #else
-#define LIKELY(x) (x)
-#endif
+#define LIKELY(condition) (condition)
+#define UNLIKELY(condition) (condition)
 #endif
 
 void Trace_Fatal(const char* functionName, const char* filename, const int line,
@@ -93,7 +92,7 @@ void Trace_Fatal(const char* functionName, const char* filename, const int line,
 #define CHECK_FAILED_HANDLER(message) FATAL("Check failed: " message)
 #define CHECK_WITH_MSG(condition, message) \
   do {                                     \
-    if (LIKELY(!(condition))) {            \
+    if (UNLIKELY(!(condition))) {          \
       CHECK_FAILED_HANDLER(message);       \
     }                                      \
   } while (false)
