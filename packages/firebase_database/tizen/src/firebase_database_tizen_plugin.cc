@@ -126,6 +126,7 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
                            std::unique_ptr<MethodResult<EncodableValue>>)>>
         method_map = {DATABASE_METHODS(V)};
 #undef V
+#undef DATABASE_METHODS
 
     const auto& it = method_map.find(method_name);
     if (it != method_map.end()) {
@@ -605,8 +606,6 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
       std::unique_ptr<StreamHandlerError<EncodableValue>> OnCancelInternal(
           const flutter::EncodableValue* arguments) override {
         TRACE_SCOPE(FT_STREAM, ToString(*arguments));
-
-        // Here, release all the associated resources.
 
         // Release events
         events_.reset();

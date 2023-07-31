@@ -1,6 +1,5 @@
 name: firebase_database_tizen
-description: Flutter plugin for Firebase Database, a cloud-hosted NoSQL database
-  with realtime data syncing across Android and iOS clients, and offline access.
+description: The Firebase Database implementation for Tizen.
 version: 0.1.0
 publish_to: 'none'
 
@@ -20,9 +19,9 @@ dependency_overrides:
     path: ../firebase_core
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
 
 flutter:
   plugin:

@@ -6,7 +6,7 @@ It offers experimental features for using Firebase on Flutter for Tizen. It work
 
 # Usage
 
-To use this package, you need to include `firebase_database_tizen` as a dependency alongside `firebase_database` and `firebase_database_platform_interface` in your `pubspec.yaml`. Please note that `firebase_database_tizen` implementation is not officially endorsed for `firebase_database`.
+To use this package, you need to include `firebase_database_tizen` as a dependency alongside `firebase_database` in your `pubspec.yaml`. Please note that `firebase_database_tizen` implementation is not officially endorsed for `firebase_database`.
 
 ```yaml
 dependencies:
@@ -19,6 +19,21 @@ Then you can import `firebase_database` in your Dart code:
 ```dart
 import 'package:firebase_database/firebase_database.dart';
 ```
+
+## Required privileges
+
+To use this plugin in a Tizen application, you may need to declare the following privileges in your `tizen-manifest.xml` file.
+
+```xml
+<privileges>
+  <privilege>http://tizen.org/privilege/internet</privilege>
+</privileges>
+```
+
+- `http://tizen.org/privilege/internet` allows the application to access the Internet.
+
+For the details on Tizen privileges, please see [Tizen Docs: API Privileges](https://docs.tizen.org/application/dotnet/get-started/api-privileges).
+
 
 # Limitations
 
