@@ -1,0 +1,34 @@
+name: firebase_storage_tizen_example
+description: Demonstrates how to use the firebase_storage plugin.
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  firebase_core: 2.4.1
+  firebase_core_tizen: ^1.0.0
+  firebase_storage: ^11.0.10
+  firebase_storage_tizen: ^0.1.0
+  flutter:
+    sdk: flutter
+  image_picker: ^0.8.6
+  image_picker_tizen: ^2.2.0
+
+dependency_overrides:
+  firebase_core_tizen:
+    path: ../../firebase_core
+  firebase_storage_tizen:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  integration_test_tizen: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/hello.txt
