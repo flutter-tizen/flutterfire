@@ -8,15 +8,14 @@ dependencies:
   firebase_core: 2.4.1
   firebase_core_tizen: ^1.0.0
   firebase_database: 10.0.9
-  firebase_database_tizen: ^0.1.0
+  firebase_database_tizen:
+    path: ..
   flutter:
     sdk: flutter
 
 dependency_overrides:
   firebase_core_tizen:
     path: ../../firebase_core
-  firebase_database_tizen:
-    path: ..
 
 dev_dependencies:
   flutter_test:
