@@ -51,6 +51,7 @@ using firebase::database::Error;
 using firebase::database::MutableData;
 using firebase::database::Query;
 using firebase::database::TransactionResult;
+using firebase::database::ValueListener;
 using flutter::BinaryMessenger;
 using flutter::EncodableMap;
 using flutter::EncodableValue;
@@ -445,6 +446,51 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
 
   void QueryObserve(const EncodableMap* arguments,
                     std::unique_ptr<MethodResult<EncodableValue>> result) {
+    // Local class FirebaseValueListener
+    //
+    class FirebaseValueListener : public ValueListener {
+     public:
+      using ObserveHandler = std::function<void(const DataSnapshot& snapshot)>;
+
+      using CancelHandler =
+          std::function<void(const Error& error, const char* error_message)>;
+
+      FirebaseValueListener(std::string event_channel_name) {
+        event_channel_name_ = event_channel_name;
+      }
+      ~FirebaseValueListener() { SetHandler(nullptr, nullptr); }
+
+      void OnValueChanged(const DataSnapshot& snapshot) override {
+        TRACE_SCOPE(FB_LISTEN);
+        if (observe_handler_) {
+          std::lock_guard<std::mutex> lock(mutex_);
+          observe_handler_(snapshot);
+        }
+      };
+
+      void OnCancelled(const Error& error, const char* error_message) override {
+        TRACE_SCOPE(FB_LISTEN);
+        if (cancel_handler_) {
+          std::lock_guard<std::mutex> lock(mutex_);
+          cancel_handler_(error, error_message);
+        }
+      };
+
+      void SetHandler(ObserveHandler observe_handler,
+                      CancelHandler cancel_handler) {
+        TRACE_SCOPE(FB_LISTEN);
+        std::lock_guard<std::mutex> lock(mutex_);
+        observe_handler_ = observe_handler;
+        cancel_handler_ = cancel_handler;
+      }
+
+     private:
+      std::mutex mutex_;
+      std::string event_channel_name_;
+      ObserveHandler observe_handler_{nullptr};
+      CancelHandler cancel_handler_{nullptr};
+    };
+
     // Local class FirebaseChildListener
     //
     class FirebaseChildListener : public ChildListener {
@@ -456,14 +502,13 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
       using CancelHandler =
           std::function<void(const Error& error, const char* error_message)>;
 
-      FirebaseChildListener(
-          std::string event_channel_name,
-          std::shared_ptr<EventChannel<EncodableValue>> channel) {
+      FirebaseChildListener(std::string event_channel_name) {
         event_channel_name_ = event_channel_name;
-        channel_ = channel;
       }
 
       ~FirebaseChildListener() { SetHandler(nullptr, nullptr); }
+
+      const std::string& event_channel_name() { return event_channel_name_; }
 
       void OnChildAdded(const DataSnapshot& snapshot,
                         const char* previous_sibling_key) override {
@@ -488,7 +533,7 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
 
       void OnChildRemoved(const DataSnapshot& snapshot) override {
         TRACE_SCOPE(FB_LISTEN);
-        NotifyObserveEvent(Constants::kChildRemove, snapshot, nullptr);
+        NotifyObserveEvent(Constants::kChildRemove, snapshot, "");
       }
 
       void OnCancelled(const Error& error, const char* error_message) override {
@@ -525,7 +570,6 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
      private:
       std::mutex mutex_;
       std::string event_channel_name_;
-      std::shared_ptr<EventChannel<EncodableValue>> channel_;
       ObserveHandler observe_handler_{nullptr};
       CancelHandler cancel_handler_{nullptr};
     };
@@ -539,18 +583,12 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
       FlutterStreamHandler(
           std::shared_ptr<Query> query,
           std::shared_ptr<EventChannel<EncodableValue>> channel,
-          FirebaseChildListener* childListener)
-          : query_(query), channel_(channel), childListener_(childListener) {}
+          std::string event_channel_name)
+          : query_(query),
+            channel_(channel),
+            event_channel_name_(event_channel_name) {}
 
-      ~FlutterStreamHandler() {
-        if (childListener_) {
-          TRACE(FT_STREAM,
-                "[!] delete childListener_, but it's supposed to be deleted "
-                "inside OnCancelInternal()");
-          query_->RemoveChildListener(childListener_);
-          delete childListener_;
-        }
-      }
+      ~FlutterStreamHandler() { ReleaseListener(); }
 
      protected:
       std::unique_ptr<StreamHandlerError<EncodableValue>> OnListenInternal(
@@ -560,10 +598,11 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
 
         // NOTE(daeyeon): Any event_channel_name bound to this handler is
         // unique, and it is expected that this function will be called only
-        // once for the event_channel_name. Therefore, we assume that the sink
-        // should always be nullptr at this point.
+        // once for the event_channel_name. Therefore, we assume that the
+        // sink, events_, should always be nullptr at this point.
         CHECK_NULL(events_);
-        CHECK_NOT_NULL(childListener_);
+        CHECK_NULL(childListener_);
+        CHECK_NULL(valueListener_);
 
         events_ = std::move(events);
 
@@ -575,31 +614,66 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
         event_type_ =
             GetOptionalValue<std::string>(&map, Constants::kEventType).value();
 
-        // Register a handler to send an event
-        childListener_->SetHandler(
-            [this](const std::string& event_type, const DataSnapshot& snapshot,
-                   const char* previous_sibling_key) {
-              TRACE_SCOPE(FT_STREAM, "listen:", event_type_,
-                          "receive:", event_type, "key:",
-                          previous_sibling_key == nullptr
-                              ? "{}"
-                              : previous_sibling_key);
+        TRACE(FT_STREAM, "type:", event_type_, "channel:", event_channel_name_);
 
-              if (event_type_ == event_type) {
-                EncodableMap payload = CreateDataSnapshotPayload(&snapshot);
-                payload.insert(
-                    EncodableValuePair(Constants::kEventType, event_type));
-                if (previous_sibling_key) {
+        // Create and register a handler to send events
+        if (event_type_ == Constants::kValue) {
+          valueListener_ =
+              std::make_shared<FirebaseValueListener>(event_channel_name_);
+
+          valueListener_->SetHandler(
+              [this](const DataSnapshot& snapshot) {
+                TRACE_SCOPE(FT_STREAM);
+                events_->Success(
+                    EncodableValue(CreateDataSnapshotPayload(&snapshot)));
+              },
+              [this](const Error& error, const char* error_message) {
+                TRACE_SCOPE(FT_STREAM, "error_message", error_message);
+                events_->Error(std::to_string(error), error_message);
+              });
+
+          query_->AddValueListener(valueListener_.get());
+        } else {
+          childListener_ =
+              std::make_shared<FirebaseChildListener>(event_channel_name_);
+
+          childListener_->SetHandler(
+              [this](const std::string& event_type,
+                     const DataSnapshot& snapshot,
+                     const char* previous_sibling_key) {
+                CHECK_NOT_NULL(previous_sibling_key);
+                bool has_previous_sibling_key = previous_sibling_key[0] != '\0';
+
+                TRACE_SCOPE(
+                    FT_STREAM, "type:", event_type_, "previous_sibling_key:",
+                    has_previous_sibling_key ? previous_sibling_key : "{}");
+
+                if (event_type_ == event_type) {
+                  EncodableMap payload = CreateDataSnapshotPayload(&snapshot);
+                  payload.insert(
+                      EncodableValuePair(Constants::kEventType, event_type));
+
+                  // Note: if the previous_sibling_key is an empty string, it
+                  // should be represented as a null EncodableValue. This
+                  // situation commonly occurs when the cloud backend does not
+                  // have any entity.
                   payload.insert(EncodableValuePair(
-                      Constants::kPreviousChildKey, previous_sibling_key));
+                      Constants::kPreviousChildKey,
+                      has_previous_sibling_key
+                          ? EncodableValue(previous_sibling_key)
+                          : EncodableValue()));
+
+                  events_->Success(EncodableValue(payload));
                 }
-                events_->Success(EncodableValue(payload));
-              }
-            },
-            [this](const Error& error, const char* error_message) {
-              TRACE_SCOPE(FT_STREAM, "error_message", error_message);
-              events_->Error(std::to_string(error), error_message);
-            });
+              },
+              [this](const Error& error, const char* error_message) {
+                TRACE_SCOPE(FT_STREAM, "error_message", error_message);
+                events_->Error(std::to_string(error), error_message);
+              });
+
+          query_->AddChildListener(childListener_.get());
+        }
+
         return nullptr;
       }
 
@@ -607,13 +681,9 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
           const flutter::EncodableValue* arguments) override {
         TRACE_SCOPE(FT_STREAM, ToString(*arguments));
 
-        // Release events
         events_.reset();
 
-        // Release the listener referring to query_.
-        query_->RemoveChildListener(childListener_);
-        delete childListener_;
-        childListener_ = nullptr;
+        ReleaseListener();
 
         // Calling this will release this instance itself.
         channel_->SetStreamHandler(nullptr);
@@ -622,11 +692,25 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
       }
 
      private:
+      void ReleaseListener() {
+        if (childListener_) {
+          query_->RemoveChildListener(childListener_.get());
+          childListener_.reset();
+        }
+
+        if (valueListener_) {
+          query_->RemoveValueListener(valueListener_.get());
+          valueListener_.reset();
+        }
+      }
+
       std::shared_ptr<Query> query_;
       std::shared_ptr<EventChannel<EncodableValue>> channel_;
       std::string event_type_;
       std::unique_ptr<EventSink<EncodableValue>> events_;
-      FirebaseChildListener* childListener_;
+      std::string event_channel_name_;
+      std::shared_ptr<FirebaseValueListener> valueListener_;
+      std::shared_ptr<FirebaseChildListener> childListener_;
     };
 
     TRACE_SCOPE(DATABASE);
@@ -645,18 +729,14 @@ class FirebaseDatabaseTizenPlugin : public flutter::Plugin {
         binary_messenger_, event_channel_name,
         &flutter::StandardMethodCodec::GetInstance());
 
-    // Create a listener to this query. This is supposed to be deleted in
-    // FirebaseChildListener::OnCancelInternal.
-    auto listener = new FirebaseChildListener(event_channel_name, channel);
-    query.AddChildListener(listener);
-
     // Create a stream handler
     auto stream_handler = std::make_unique<FlutterStreamHandler>(
-        std::make_shared<Query>(query), channel, listener);
+        std::make_shared<Query>(query), channel, event_channel_name);
 
     // Register a stream handler on this channel
     channel->SetStreamHandler(std::move(stream_handler));
 
+    // Set the result with the registered event channel name
     result->Success(EncodableValue(event_channel_name));
   }
 
