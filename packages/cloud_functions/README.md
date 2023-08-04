@@ -6,7 +6,7 @@ It offers experimental features for using Firebase on Flutter for Tizen. It work
 
 # Usage
 
-To use this package, you need to include `cloud_functions_tizen` as a dependency alongside `cloud_functions` and `cloud_functions_platform_interface` in your `pubspec.yaml`. Please note that `cloud_functions_tizen` implementation is not officially endorsed for `cloud_functions`.
+To use this package, you need to include `cloud_functions_tizen` as a dependency alongside `cloud_functions` in your `pubspec.yaml`. Please note that `cloud_functions_tizen` implementation is not officially endorsed for `cloud_functions`.
 
 ```yaml
 dependencies:
