@@ -1,0 +1,28 @@
+name: tests
+description: A test app for firebase database plugin (e2e).
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+
+dependencies:
+  firebase_core: 2.4.1
+  firebase_core_tizen: ^1.0.0
+  firebase_database: 10.0.9
+  firebase_database_tizen:
+    path: ..
+  flutter:
+    sdk: flutter
+
+dependency_overrides:
+  firebase_core_tizen:
+    path: ../../firebase_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  integration_test_tizen: ^2.0.1
+
+flutter:
+  uses-material-design: true

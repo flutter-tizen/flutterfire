@@ -1,5 +1,5 @@
 plugins:
   firebase_core: ["tv-7.0"]
-  firebase_database: []
+  firebase_database: ["tv-7.0"]
   firebase_storage: []
   cloud_functions: ["tv-7.0"]
