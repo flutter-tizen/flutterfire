@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+
+#ifndef FIREBASE_TIZEN_DEP_COMMON_LOGGER_H_
+#define FIREBASE_TIZEN_DEP_COMMON_LOGGER_H_
 
 #include <cassert>
 #include <functional>
@@ -166,3 +168,5 @@ class IndentCounter {
  private:
   std::string id_;
 };
+
+#endif  // FIREBASE_TIZEN_DEP_COMMON_LOGGER_H_

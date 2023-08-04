@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+
+#ifndef CLOUD_FUNCTIONS_TIZEN_QUEUE_HPP_
+#define CLOUD_FUNCTIONS_TIZEN_QUEUE_HPP_
 
 #include <condition_variable>
 #include <mutex>
@@ -58,3 +60,5 @@ class Queue {
   std::mutex mutex_;
   std::condition_variable cv_;
 };
+
+#endif  // CLOUD_FUNCTIONS_TIZEN_QUEUE_HPP_

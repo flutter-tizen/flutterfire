@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+
+#ifndef FIREBASE_TIZEN_DEP_COMMON_TO_STRING_H_
+#define FIREBASE_TIZEN_DEP_COMMON_TO_STRING_H_
 
 #include <firebase/variant.h>
 #include <flutter/encodable_value.h>
@@ -69,3 +71,5 @@ std::string ToString(const T& value) {
   ss << value;
   return ss.str();
 }
+
+#endif  // FIREBASE_TIZEN_DEP_COMMON_TO_STRING_H_

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "firebase_database_tizen_plugin.h"
+#include "firebase_database_plugin.h"
 
 #include <firebase/database.h>
 #include <firebase/database/mutable_data.h>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CLOUD_FUNCTIONS_TIZEN_CLOUD_FUNCTIONS_PLUGIN_H_
-#define CLOUD_FUNCTIONS_TIZEN_CLOUD_FUNCTIONS_PLUGIN_H_
+#ifndef FIREBASE_DATABASE_TIZEN_FIREBASE_DATABASE_PLUGIN_H_
+#define FIREBASE_DATABASE_TIZEN_FIREBASE_DATABASE_PLUGIN_H_
 
 #include <flutter_plugin_registrar.h>
 
@@ -29,11 +29,11 @@
 extern "C" {
 #endif
 
-FLUTTER_PLUGIN_EXPORT void CloudFunctionsPluginRegisterWithRegistrar(
+FLUTTER_PLUGIN_EXPORT void FirebaseDatabaseTizenPluginRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar);
 
 #if defined(__cplusplus)
 }  // extern "C"
 #endif
 
-#endif  // CLOUD_FUNCTIONS_TIZEN_CLOUD_FUNCTIONS_PLUGIN_H_
+#endif  // FIREBASE_DATABASE_TIZEN_FIREBASE_DATABASE_PLUGIN_H_
