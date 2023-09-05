@@ -1,0 +1,32 @@
+name: Lint commit message
+
+on: [pull_request]
+
+env:
+  NODE_VERSION: lts/*
+
+jobs:
+  lint-commit-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute number of commits
+        id: nb-of-commits
+        run: |
+          echo "plusOne=$((${{ github.event.pull_request.commits }} + 1))" >> $GITHUB_OUTPUT
+          echo "minusOne=$((${{ github.event.pull_request.commits }} - 1))" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: ${{ steps.nb-of-commits.outputs.plusOne }}
+          persist-credentials: false
+      - run: git reset HEAD^2
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install required dependencies
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+      - name: Validate the first commit message
+        run: |
+          commitlint -V --config .github/workflows/commitlint.config.js \
+            --to HEAD~${{ steps.nb-of-commits.outputs.minusOne }}
