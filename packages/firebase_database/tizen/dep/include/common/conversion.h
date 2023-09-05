@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+
+#ifndef FIREBASE_TIZEN_DEP_COMMON_CONVERSION_H_
+#define FIREBASE_TIZEN_DEP_COMMON_CONVERSION_H_
 
 #include <firebase/variant.h>
 #include <flutter/encodable_value.h>
@@ -27,3 +29,5 @@ class Conversion {
                                              const char* key);
   static flutter::EncodableValue ToEncodableValue(const firebase::Variant& v);
 };
+
+#endif  // FIREBASE_TIZEN_DEP_COMMON_CONVERSION_H_

@@ -9,11 +9,13 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either xess or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+
+#ifndef FIREBASE_TIZEN_DEP_COMMON_TRACE_H_
+#define FIREBASE_TIZEN_DEP_COMMON_TRACE_H_
 
 #include "logger.h"
 
@@ -100,3 +102,5 @@ void Trace_Fatal(const char* functionName, const char* filename, const int line,
 #define CHECK_NULL(val) CHECK((val) == nullptr)
 #define CHECK_NOT_NULL(val) CHECK((val) != nullptr)
 #define UNIMPLEMENTED(...) CHECK_WITH_MSG(false, "[UNIMPLEMENTED] " __VA_ARGS__)
+
+#endif  // FIREBASE_TIZEN_DEP_COMMON_TRACE_H_

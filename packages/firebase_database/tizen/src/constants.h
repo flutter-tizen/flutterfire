@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FIREBASE_DATABASE_TIZEN_CONSTANTS_H_
+#define FIREBASE_DATABASE_TIZEN_CONSTANTS_H_
 
 class Constants {
  public:
@@ -61,3 +62,5 @@ class Constants {
   static constexpr char kType[] = "type";
   static constexpr char kValue[] = "value";
 };
+
+#endif  // FIREBASE_DATABASE_TIZEN_CONSTANTS_H_

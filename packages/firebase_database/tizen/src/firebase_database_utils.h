@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef FIREBASE_DATABASE_TIZEN_FIREBASE_DATABASE_UTILS_H_
+#define FIREBASE_DATABASE_TIZEN_FIREBASE_DATABASE_UTILS_H_
 
 #include <firebase/database.h>
 #include <flutter/encodable_value.h>
@@ -36,3 +37,5 @@ flutter::EncodableMap CreateDataSnapshotPayload(
 
 flutter::EncodableMap CreateMutableDataSnapshotPayload(
     firebase::database::MutableData* snapshot);
+
+#endif  // FIREBASE_DATABASE_TIZEN_FIREBASE_DATABASE_UTILS_H_
