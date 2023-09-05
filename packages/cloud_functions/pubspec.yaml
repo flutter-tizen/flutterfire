@@ -1,18 +1,18 @@
 name: cloud_functions_tizen
-description: A Flutter plugin allowing you to use Firebase Cloud Functions.
+description: The Firebase Cloud Functions implementation for Tizen.
 version: 0.1.0
 homepage:
 repository:
-publish_to: 'none'
+publish_to: "none"
 
 environment:
   sdk: ">=2.18.0 <4.0.0"
   flutter: ">=3.3.0"
 
 dependencies:
-  firebase_core_tizen: ^1.0.0
   cloud_functions: 4.0.7
   cloud_functions_platform_interface: 5.1.26
+  firebase_core_tizen: ^1.0.0
   flutter:
     sdk: flutter
 
@@ -21,9 +21,9 @@ dependency_overrides:
     path: ../firebase_core
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
 
 flutter:
   plugin:
