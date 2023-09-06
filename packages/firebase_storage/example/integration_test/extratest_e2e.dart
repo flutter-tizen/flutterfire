@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import './test_utils.dart';
 
-const String kOkString = 'ok';
-final List<int> okStringList = utf8.encode(kOkString);
+const String kOkString = 'kOk';
 
 void setupExtraTests() {
   group('$Reference', () {

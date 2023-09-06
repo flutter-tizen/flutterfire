@@ -15,7 +15,6 @@
 #include "flutter_types.hpp"
 
 class StorageTask;
-class StoragePutBytesTask;
 
 class StorageTaskHandler {
  public:
