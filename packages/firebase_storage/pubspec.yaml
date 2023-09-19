@@ -1,0 +1,30 @@
+name: firebase_storage_tizen
+description: Flutter plugin for Firebase Cloud Storage, a powerful, simple, and
+  cost-effective object storage service for Tizen.
+version: 0.1.0
+homepage:
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  firebase_core_tizen: ^1.0.0
+  firebase_storage: ^11.0.10
+  flutter:
+    sdk: flutter
+
+dependency_overrides:
+  firebase_core_tizen:
+    path: ../firebase_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      tizen:
+        pluginClass: FirebaseStorageTizenPlugin
+        fileName: firebase_storage_tizen_plugin.h
