@@ -6,8 +6,8 @@ environment:
   flutter: ">=3.3.0"
 
 dependencies:
-  firebase_core: 2.4.1
-  firebase_core_tizen: ^1.0.0
+  firebase_core: ^2.21.0
+  firebase_core_tizen: ^1.0.1
   firebase_storage: ^11.0.10
   firebase_storage_tizen: ^0.1.0
   flutter:

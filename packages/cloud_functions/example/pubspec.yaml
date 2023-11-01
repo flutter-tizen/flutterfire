@@ -8,8 +8,8 @@ dependencies:
   cloud_functions: 4.0.7
   cloud_functions_tizen:
     path: ..
-  firebase_core: 2.4.1
-  firebase_core_tizen: ^1.0.0
+  firebase_core: ^2.21.0
+  firebase_core_tizen: ^1.0.1
   flutter:
     sdk: flutter
 
