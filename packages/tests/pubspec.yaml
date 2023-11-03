@@ -1,0 +1,8 @@
+# ignore_for_file sort_pub_dependencies
+name: flutterfire_test
+description: A an app for FlutterFire testing (e2e).
+publish_to: "none"
+version: 0.0.1
+
+environment:
+  sdk: ">=2.16.0 <3.0.0"
