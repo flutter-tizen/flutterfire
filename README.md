@@ -25,3 +25,5 @@ Please note that the plugins are now in an early stage of development, as they'r
 ## License
 
 The licence is described separately in each package. [LICENSE](./LICENSE) contains all the licences for the entire repository.
+
+build test
