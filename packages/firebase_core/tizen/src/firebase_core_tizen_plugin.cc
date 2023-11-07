@@ -14,9 +14,11 @@
 #include <string>
 
 #include "log.h"
-#include "messages.h"
+#include "messages.g.h"
 
-namespace {
+using ::firebase::App;
+
+namespace firebase_core_tizen {
 
 class FirebaseCoreTizenPlugin : public flutter::Plugin,
                                 public FirebaseCoreHostApi,
@@ -69,7 +71,31 @@ FirebaseCoreTizenPlugin::FirebaseCoreTizenPlugin(
 
 FirebaseCoreTizenPlugin::~FirebaseCoreTizenPlugin() {}
 
-static PigeonFirebaseOptions FirebaseOptionsToPigeonOptions(
+// Convert a Pigeon FirebaseOptions to a Firebase Options.
+firebase::AppOptions PigeonFirebaseOptionsToAppOptions(
+    const PigeonFirebaseOptions& pigeon_options) {
+  firebase::AppOptions app_options;
+
+  app_options.set_api_key(pigeon_options.api_key().c_str());
+  app_options.set_app_id(pigeon_options.app_id().c_str());
+  app_options.set_messaging_sender_id(
+      pigeon_options.messaging_sender_id().c_str());
+  app_options.set_project_id(pigeon_options.project_id().c_str());
+  if (pigeon_options.database_u_r_l()) {
+    app_options.set_database_url(pigeon_options.database_u_r_l()->c_str());
+  }
+  if (pigeon_options.storage_bucket()) {
+    app_options.set_storage_bucket(pigeon_options.storage_bucket()->c_str());
+  }
+  if (pigeon_options.tracking_id()) {
+    app_options.set_ga_tracking_id(pigeon_options.tracking_id()->c_str());
+  }
+
+  return app_options;
+}
+
+// Convert a AppOptions to PigeonInitializeOption
+PigeonFirebaseOptions OptionsFromFIROptions(
     const firebase::AppOptions& options) {
   PigeonFirebaseOptions pigeon_options;
 
@@ -90,25 +116,12 @@ static PigeonFirebaseOptions FirebaseOptionsToPigeonOptions(
   return pigeon_options;
 }
 
-static firebase::AppOptions PigeonOptionsToFirebaseOptions(
-    const PigeonFirebaseOptions& options) {
-  firebase::AppOptions app_options;
-
-  app_options.set_api_key(options.api_key().c_str());
-  app_options.set_app_id(options.app_id().c_str());
-  app_options.set_messaging_sender_id(options.messaging_sender_id().c_str());
-  app_options.set_project_id(options.project_id().c_str());
-  if (options.database_u_r_l()) {
-    app_options.set_database_url(options.database_u_r_l()->c_str());
-  }
-  if (options.storage_bucket()) {
-    app_options.set_storage_bucket(options.storage_bucket()->c_str());
-  }
-  if (options.tracking_id()) {
-    app_options.set_ga_tracking_id(options.tracking_id()->c_str());
-  }
-
-  return app_options;
+// Convert a firebase::App to PigeonInitializeResponse
+PigeonInitializeResponse AppToPigeonInitializeResponse(const App& app) {
+  PigeonInitializeResponse response = PigeonInitializeResponse();
+  response.set_name(app.name());
+  response.set_options(OptionsFromFIROptions(app.options()));
+  return response;
 }
 
 void FirebaseCoreTizenPlugin::InitializeApp(
@@ -118,33 +131,29 @@ void FirebaseCoreTizenPlugin::InitializeApp(
   firebase::App* app = firebase::App::GetInstance(app_name.c_str());
   if (!app) {
     app = firebase::App::Create(
-        PigeonOptionsToFirebaseOptions(initialize_app_request),
+        PigeonFirebaseOptionsToAppOptions(initialize_app_request),
         app_name.c_str());
   }
 
-  PigeonInitializeResponse message_response;
-  message_response.set_name(app->name());
-  message_response.set_options(FirebaseOptionsToPigeonOptions(app->options()));
-
-  result(message_response);
+  // Send back the result to Flutter
+  result(AppToPigeonInitializeResponse(*app));
 }
 
 void FirebaseCoreTizenPlugin::InitializeCore(
     std::function<void(ErrorOr<flutter::EncodableList> reply)> result) {
-  flutter::EncodableList response;
-
-  std::vector<firebase::App*> firebase_apps = firebase::App::GetApps();
-  for (auto app : firebase_apps) {
-    PigeonInitializeResponse message_response;
-    message_response.set_name(app->name());
-    message_response.set_options(
-        FirebaseOptionsToPigeonOptions(app->options()));
-
-    response.push_back(
-        flutter::EncodableValue(message_response.ToEncodableMap()));
+  // TODO: Missing function to get the list of currently initialized apps
+  std::vector<PigeonInitializeResponse> initializedApps;
+  std::vector<App*> all_apps = App::GetApps();
+  for (const App* app : all_apps) {
+    initializedApps.push_back(AppToPigeonInitializeResponse(*app));
   }
 
-  result(response);
+  flutter::EncodableList encodableList;
+
+  for (const auto& item : initializedApps) {
+    encodableList.push_back(flutter::CustomEncodableValue(item));
+  }
+  result(encodableList);
 }
 
 void FirebaseCoreTizenPlugin::OptionsFromResource(
@@ -177,11 +186,11 @@ void FirebaseCoreTizenPlugin::Delete(
   result(std::nullopt);
 }
 
-}  // namespace
+}  // namespace firebase_core_tizen
 
 void FirebaseCoreTizenPluginRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
-  FirebaseCoreTizenPlugin::RegisterWithRegistrar(
+  firebase_core_tizen::FirebaseCoreTizenPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrar>(registrar));
 }
