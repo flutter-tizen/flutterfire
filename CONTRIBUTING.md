@@ -86,10 +86,7 @@ before merging into the codebase.
 
 ### Pull request requirements
 - A pull request must pass CI (Continuous Integration) tests run.
-- A pull request must be reviewed and approved by at least two committers.
-- If a pull request has been open for more than 7 days with no objection, one
-  approval is enough.
-
+- A pull request must be reviewed and approved by at least one of maintainers.
 
 ### Duration of pull request
 - Recommended: Keep a pull request open for 24 hours even after approval and
