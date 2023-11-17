@@ -10,8 +10,8 @@ To use this package, you need to include `firebase_core_tizen` as a dependency a
 
 ```yaml
 dependencies:
-  firebase_core: 2.4.1
-  firebase_core_tizen: ^1.0.0
+  firebase_core: ^2.17.0
+  firebase_core_tizen: ^1.0.1
 ```
 
 Then you can import `firebase_core` in your Dart code:

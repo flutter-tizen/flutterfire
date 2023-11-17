@@ -1,7 +1,7 @@
 name: firebase_core_tizen
 description: Flutter plugin for Firebase Core, enabling connecting to multiple
   Firebase apps.
-version: 1.0.0
+version: 1.0.1
 homepage:
 
 environment:
@@ -9,8 +9,8 @@ environment:
   flutter: ">=3.3.0"
 
 dependencies:
-  firebase_core: 2.4.1
-  firebase_core_platform_interface: 4.5.2
+  firebase_core: ^2.17.0
+  firebase_core_platform_interface: ^4.8.0
   flutter:
     sdk: flutter
 
@@ -18,7 +18,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  pigeon: ^3.2.9
+  pigeon: 9.2.5
 
 flutter:
   plugin:
