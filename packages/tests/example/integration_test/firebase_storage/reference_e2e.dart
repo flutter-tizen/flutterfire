@@ -5,10 +5,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:tests/firebase_options.dart';
 import './test_utils.dart';
 
 void setupReferenceTests() {
@@ -16,7 +17,13 @@ void setupReferenceTests() {
     late FirebaseStorage storage;
 
     setUpAll(() async {
-      storage = FirebaseStorage.instance;
+      // Create a new app due to options initialization conflict
+      // with the default app in another package.
+      FirebaseApp app = await Firebase.initializeApp(
+        name: "storage",
+        options: DefaultFirebaseOptions.baseOptions,
+      );
+      storage = FirebaseStorage.instanceFor(app: app);
     });
 
     group('bucket', () {
@@ -460,7 +467,8 @@ void setupReferenceTests() {
     test('toString', () async {
       expect(
         storage.ref('/uploadNope.jpeg').toString(),
-        equals('Reference(app: [DEFAULT], fullPath: uploadNope.jpeg)'),
+        equals(
+            'Reference(app: storage, fullPath: uploadNope.jpeg)'), // [DEFAULT] -> storage
       );
     });
   });

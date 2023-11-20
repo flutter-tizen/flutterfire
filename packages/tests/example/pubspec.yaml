@@ -1,0 +1,40 @@
+# ignore_for_file sort_pub_dependencies
+name: tests
+description: A an app for FlutterFire testing (e2e).
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.16.0 <3.0.0"
+
+dependencies:
+  cloud_functions_tizen:
+    path: ../../cloud_functions
+  firebase_core_tizen:
+    path: ../../firebase_core
+  firebase_database_tizen:
+    path: ../../firebase_database
+  firebase_storage_tizen:
+    path: ../../firebase_storage
+  flutter:
+    sdk: flutter
+
+dependency_overrides:
+  cloud_functions_tizen:
+    path: ../../cloud_functions
+  firebase_core_tizen:
+    path: ../../firebase_core
+  firebase_database_tizen:
+    path: ../../firebase_database
+  firebase_storage_tizen:
+    path: ../../firebase_storage
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  integration_test_tizen: ^2.0.1
+
+flutter:
+  uses-material-design: true

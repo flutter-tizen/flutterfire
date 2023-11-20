@@ -124,7 +124,7 @@ class Device {
 
     final io.Process process = await _processRunner.start(
       'flutter-tizen',
-      <String>['-d', serial!, 'test', 'integration_test'],
+      <String>['-d', serial!, 'test', 'integration_test/e2e_test.dart'],
       workingDirectory: workingDir,
     );
 
